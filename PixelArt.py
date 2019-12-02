@@ -6,11 +6,10 @@
 import graphics
 from graphics import *
 
-import tkinter
-
-
 def main():
-  #----------Parameters----------
+  
+#----------Parameters----------
+
   canvas_width = 512
   canvas_height = 512
 
@@ -23,91 +22,114 @@ def main():
   wid = margin + canvas_width + margin + tool_width + margin
   hei = 2 * margin + canvas_height
 
-  #----------Start Screen----------
+#----------Start Screen----------
+
   win = GraphWin("PixelArt", wid, hei)
   win.setBackground(color_rgb(255, 255, 255))
 
   txt, box = makebutton("Click here to start drawing",
-                        wid / 2, hei / 2, 250, 50, [220, 220, 220])
+                        wid / 2, hei / 2, 250, 50, [0, 0, 0])
+  txt._reconfig('font', ('Manaspace Regular', 18))
+  txt.setTextColor(color_rgb(250, 250, 250))
+  
   box.draw(win)
   txt.draw(win)
 
   win.getMouse()
+  # Add restrictions
 
-  # Undraw the button
+#----------Undraw the button----------
+
   txt.undraw()
   box.undraw()
 
-  #----------Grid----------
+#----------Grid----------
 
-  drawgrid(win, margin, canvas_width, canvas_height, rows, cols, 240, 240, 240)
+  drawgrid(win, margin, canvas_width, canvas_height, rows,
+           cols, 240, 240, 240)
 
-  #----------Coloring---------- (incomplete)
+#----------Coloring----------
 
-  # Drop-down Menu
-  # options = tkinter.StringVar(win)
+  color_choice(win, canvas_width, margin, 255, 127, 80)
 
-  # colors = ["black", "gray", "silver", "whitesmoke", "rosybrown", "firebrick",
-  #           "red", "darksalmon", "sienna", "sandybrown"]  # will add on later
-  # options.set("black")
+#------User Interaction-------
 
-  # color_dropdown = tkinter.OptionMenu(win, options, *colors)
-  # tkinter.Label(win, text="Select a color").grid(rows, cols)
-  # color_dropdown.grid(rows, cols)
-
-  # tkinter.mainloop()
-
-  #----------Mouse Tracing----------
-
-  #----------Pixels---------- (incomplete)
-
-  # fill_in = win.getMouse()
-
-  # square = Rectangle(Point(fill_in), Point(fill_in + 50))
-  # square.setFill(color_rgb(0, 0, 0))
-  # square.draw(win)
-
-  #------User Interaction-------
   while True:
     # Wait for user to click somewhere
+
     pt = win.checkMouse()
     if pt:
       if clicked_on_canvas(pt, margin, canvas_width, canvas_height):
         row, col = where_did_i_click(pt, margin, canvas_width, canvas_height, rows, cols)
         print("Let's paint cell ({}, {})!".format(row, col))
 
-        paint(win, margin, canvas_width, canvas_height, rows, cols, row, col, 'blue', color_rgb(240, 240, 240))
+        paint(win, margin, canvas_width, canvas_height, rows, cols, row,
+              col, 'blue', color_rgb(240, 240, 240))
       else:
         print("Hey! You clicked on ({}, {})".format(pt.getX(), pt.getY()))
 
     key = win.checkKey()
     if key:
       if key == "Escape":
-        break
+        win.close()
       else:
         print("Hey! You pressed", key)
 
-  #----------Save File----------
+#----------Save File----------
 
+
+
+#----------Functions----------
 
 def clicked_on_canvas(pt, margin, wid, hei):
   ''' Return true if the user clicked on the canvas, false otherwise.'''
   x = pt.getX()
   y = pt.getY()
 
-  # if x >= margin and x <= margin + canvas_width:
-  #   if y >= margin and y <= margin + canvas_height:
-  #     return True
-  #   else:
-  #     return False
-  # else:
-  #   return False
-
   return (x >= margin and x <= margin + wid) and (y >= margin and y <= margin + hei)
 
+#-----------------------------
+
+def color_choice(win, canvas_width, margin, r, g, b):
+  '''Select a color using its RGB value'''
+
+  color_text = Text(Point(margin + margin + canvas_width + 100, 54), "RGB Color")
+  color_text._reconfig('font', ('Manaspace Regular', 14))
+  color_text.setTextColor(color_rgb(0, 0, 0))
+  
+  color_box = Rectangle(Point(margin + margin + canvas_width, 64),
+                        Point(margin + margin + canvas_width + 200, 96))
+  color_box.setFill(color_rgb(r, g, b))
+  color_box.setOutline(color_rgb(r, g, b))
+
+  color_entry = Entry(Point(margin + margin + canvas_width + 100, 80), 12)
+  color_entry.setText("0,0,255")
+  color_entry.setFill(color_rgb(250, 250, 250))
+
+  #color_input = int(input(color_entry.getText()))
+
+  #R, G, B = float(color_input.split(','))
+
+  color_text.draw(win)
+  color_box.draw(win)
+  color_entry.draw(win)
+
+  #return R, G, B
+
+#-----------------------------
 
 def drawgrid(win, margin, canvas_width, canvas_height, rows, cols, r, g, b):
   '''Draw a grid with lines of color (r,g,b).'''
+
+  #Background color
+  
+
+  # Box filled white
+  box = Rectangle(Point(margin, margin),
+                  Point(margin + canvas_width, margin + canvas_height))
+  box.setFill(color_rgb(255, 255, 255))
+  box.setOutline(color_rgb(255, 255, 255))
+  
   # Draw vertical lines
   pixels_per_cell = canvas_width / cols
   x = margin + pixels_per_cell
@@ -129,19 +151,22 @@ def drawgrid(win, margin, canvas_width, canvas_height, rows, cols, r, g, b):
     y += pixels_per_cell
 
   # Draw outer box
-  box = Rectangle(Point(margin, margin),
+  outer_box = Rectangle(Point(margin, margin),
                   Point(margin + canvas_width, margin + canvas_height))
-  box.draw(win)
+  outer_box.draw(win)
+  
 
+#-----------------------------
 
 def makebutton(txt, x, y, w, h, clr):
   '''Make a button with the given text.'''
   txt = Text(Point(x, y), txt)
-  box = Rectangle(Point(x - w / 2, y - h / 2), Point(x + w / 2, y + h / 2))
+  box = Rectangle(Point(x - w, y - h ), Point(x + w, y + h ))
   box.setFill(color_rgb(clr[0], clr[1], clr[2]))
 
   return txt, box
 
+#-----------------------------
 
 def paint(win, margin, wid, hei, rows, cols, row, col, clr, gridclr):
   '''Paint a cell in the canvas.'''
@@ -155,6 +180,7 @@ def paint(win, margin, wid, hei, rows, cols, row, col, clr, gridclr):
   rect.setFill(clr)
   rect.draw(win)
 
+#-----------------------------
 
 def where_did_i_click(pt, margin, wid, hei, rows, cols):
   ''' Return row and column in the canvas where the user clicked.'''
