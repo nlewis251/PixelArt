@@ -35,47 +35,51 @@ def main():
   box.draw(win)
   txt.draw(win)
 
-  start_pt = win.getMouse()
-  if start_pt:
-    if clicked_on_start(start_pt, wid, hei):
-      txt.undraw()
-      box.undraw()
+  while True:
+    start(txt, box, win, wid, hei)
+
+    if win.isClosed():
+      break
+
+    else:
+    
+    #----------Grid----------
+      
       drawgrid(win, margin, canvas_width, canvas_height, rows,
            cols, 240, 240, 240)
+    
     #----------Coloring----------
 
-      color_choice(win, canvas_width, margin, 255, 127, 80)
+      color_entry = color_graphics(win, canvas_width, margin, 255, 127, 80)
 
     #------User Interaction-------
-
+      
       while True:
       # Wait for user to click somewhere
-
-        once = []
       
         pt = win.checkMouse()
+        key = win.checkKey()
+
+        R, G, B = (0, 0, 255)
+        color = color_entrybox(color_entry)
+
+        if key == "Escape":
+            win.close()
+            break
+
+        elif key == 'Return':
+          color_new = color
+          
+          if color_new != color:
+            color == color_new
+            R, G, B == color.split(',')
+        
         if pt:
           if clicked_on_canvas(pt, margin, canvas_width, canvas_height):
             row, col = where_did_i_click(pt, margin, canvas_width, canvas_height, rows, cols)
-            print("Let's paint cell ({}, {})!".format(row, col))
 
             paint(win, margin, canvas_width, canvas_height, rows, cols, row,
-                  col, 'blue', color_rgb(240, 240, 240))
-            once.append(rect)
-          
-          else:
-            print("Hey! You clicked on ({}, {})".format(pt.getX(), pt.getY()))
-
-        key = win.checkKey()
-        if key:
-          if key == "Escape":
-            win.close()
-          else:
-            print("Hey! You pressed", key)
-
-      else:
-        print("That's not right...")
-
+                  col, color_rgb(R, G, B), color_rgb(240, 240, 240))
 
 #----------Functions----------
 
@@ -88,16 +92,28 @@ def clicked_on_canvas(pt, margin, wid, hei):
 
 #-----------------------------
 
-def clicked_on_start(start_pt, wid, hei):
+def start(txt, box, win, wid, hei):
   ''' Return true if the user clicked on the canvas, false otherwise.'''
-  j = start_pt.getX()
-  k = start_pt.getY()
+  while True:
+    start_pt = win.checkMouse()
+    if start_pt:
+      j = start_pt.getX()
+      k = start_pt.getY()
 
-  return (j >= (wid/2) - 250 and j <= (wid/2) + 250) and (k >= (hei/2) - 50 and k <=  (hei/2) + 50)
+      if (j >= (wid/2) - 250 and j <= (wid/2) + 250) and (k >= (hei/2) - 50 and k <=  (hei/2) + 50):
+        txt.undraw()
+        box.undraw()
+        break
+
+    key = win.checkKey()
+    if key:
+      if key == "Escape":
+        win.close()
+        break
 
 #-----------------------------
 
-def color_choice(win, canvas_width, margin, r, g, b):
+def color_graphics(win, canvas_width, margin, r, g, b):
   '''Select a color using its RGB value'''
 
   color_text = Text(Point(margin + margin + canvas_width + 100, 54), "RGB Color")
@@ -113,15 +129,19 @@ def color_choice(win, canvas_width, margin, r, g, b):
   color_entry.setText("0,0,255")
   color_entry.setFill(color_rgb(250, 250, 250))
 
-  #color_input = int(input(color_entry.getText()))
-
-  #R, G, B = float(color_input.split(','))
-
   color_text.draw(win)
   color_box.draw(win)
   color_entry.draw(win)
 
-  #return R, G, B
+  return color_entry
+
+#-----------------------------
+
+def color_entrybox(color_entry):
+
+  color = color_entry.getText()
+
+  return color
 
 #-----------------------------
 
@@ -183,9 +203,7 @@ def paint(win, margin, wid, hei, rows, cols, row, col, clr, gridclr):
   rect.setOutline(gridclr)
   rect.setFill(clr)
   rect.draw(win)
-
-  return rect
-
+  
 #-----------------------------
 
 def where_did_i_click(pt, margin, wid, hei, rows, cols):
